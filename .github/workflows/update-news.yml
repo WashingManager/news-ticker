@@ -1,4 +1,4 @@
-name: Update News
+name: Update News 
 on:
   schedule:
     - cron: '0 * * * *' # 매시간 0분에 실행 (UTC)
