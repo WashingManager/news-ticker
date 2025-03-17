@@ -1,13 +1,13 @@
-const fetch = require('node-fetch');
-const fs = require('fs');
+import fetch from 'node-fetch';
+import fs from 'fs';
 
 async function updateNews() {
     const SHEET_ID = process.env.SHEET_ID;
     const API_KEY = process.env.API_KEY;
     const NEWS_RANGE = '정세재난!C8:F';
 
-    console.log('SHEET_ID:', SHEET_ID); // 디버깅
-    console.log('API_KEY:', API_KEY);   // 디버깅
+    console.log('SHEET_ID:', SHEET_ID);
+    console.log('API_KEY:', API_KEY);
 
     if (!SHEET_ID || !API_KEY) throw new Error('환경 변수가 설정되지 않음');
 
