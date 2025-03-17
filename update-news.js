@@ -4,11 +4,11 @@ const fs = require('fs');
 async function updateNews() {
     const SHEET_ID = process.env.SHEET_ID;
     const API_KEY = process.env.API_KEY;
-    const NEWS_RANGE = '정세재난!C8:F';
+    const RANGE = '정세재난!C8:F';
 
     try {
         const response = await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${NEWS_RANGE}?key=${API_KEY}`
+            `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`
         );
         if (!response.ok) throw new Error(`HTTP 오류: ${response.status}`);
         const data = await response.json();
@@ -33,6 +33,7 @@ async function updateNews() {
             'news.json',
             JSON.stringify(newsItems.length > 0 ? newsItems : [{ title: '최신 이틀치 데이터가 없습니다.', url: '#' }], null, 2)
         );
+        console.log('news.json 업데이트 성공');
     } catch (error) {
         console.error('업데이트 실패:', error);
         fs.writeFileSync(
