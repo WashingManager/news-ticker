@@ -1,7 +1,7 @@
 name: Update News
 on:
   schedule:
-    - cron: '0 0,6,12,18 * * *' # 0시, 6시, 12시, 18시 (UTC)
+    - cron: '0 0,6,12,18 * * *' # UTC 기준 0시, 6시, 12시, 18시
   workflow_dispatch:
 
 jobs:
