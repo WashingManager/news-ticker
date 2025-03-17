@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '16'
       - run: npm install node-fetch@2
+      - run: |
+          sed -i "s|{{ secrets.SHEET_ID }}|${{ secrets.SHEET_ID }}|g" index.html
+          sed -i "s|{{ secrets.API_KEY }}|${{ secrets.API_KEY }}|g" index.html
       - run: node update-news.js
       - run: |
           git config user.name "GitHub Action"
