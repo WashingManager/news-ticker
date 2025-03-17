@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
-import fs from 'fs';
+const fetch = require('node-fetch');
+const fs = require('fs');
 
 async function updateNews() {
     const SHEET_ID = process.env.SHEET_ID;
