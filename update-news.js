@@ -5,13 +5,11 @@ async function updateNews() {
     const SHEET_ID = process.env.SHEET_ID;
     const API_KEY = process.env.API_KEY;
     const NEWS_RANGE = '정세재난!C8:F';
-    
-    console.log('SHEET_ID:', SHEET_ID); // 디버깅용
-    console.log('API_KEY:', API_KEY);   // 디버깅용
 
-    if (!SHEET_ID || !API_KEY) {
-        throw new Error('SHEET_ID 또는 API_KEY가 설정되지 않았습니다.');
-    }
+    console.log('SHEET_ID:', SHEET_ID); // 디버깅
+    console.log('API_KEY:', API_KEY);   // 디버깅
+
+    if (!SHEET_ID || !API_KEY) throw new Error('환경 변수가 설정되지 않음');
 
     try {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${NEWS_RANGE}?key=${API_KEY}`;
@@ -21,8 +19,8 @@ async function updateNews() {
         console.log('응답 상태:', response.status);
         console.log('응답 내용:', text);
         if (!response.ok) throw new Error(`HTTP 오류: ${response.status}`);
-        const data = await response.json();
 
+        const data = await JSON.parse(text);
         const today = new Date().toISOString().split('T')[0];
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
