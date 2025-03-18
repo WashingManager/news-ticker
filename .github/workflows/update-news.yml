@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SHEET_ID: ${{ secrets.SHEET_ID }}
-      API_KEY: ${{ secrets.SERVER_API_KEY }}
+      API_KEY: ${{ secrets.API_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
