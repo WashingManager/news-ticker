@@ -3,7 +3,7 @@ const fs = require('fs');
 
 async function updateNews() {
     const SHEET_ID = process.env.SHEET_ID;
-    const API_KEY = process.env.SERVER_API_KEY;
+    const API_KEY = process.env.API_KEY;
     const NEWS_RANGE = '정세재난!C8:F';
 
     console.log('SHEET_ID:', SHEET_ID);
