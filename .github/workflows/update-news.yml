@@ -21,13 +21,11 @@ jobs:
         with:
           node-version: '16'
       - run: npm install node-fetch@2
-      - run: |
-          echo "window.SHEET_ID='${{ secrets.SHEET_ID }}'; window.API_KEY='${{ secrets.API_KEY }}';" > config.js
       - run: node update-news.js
+      - run: node statusButton.js  # statusButton.js 실행 추가
       - run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          git add news.json config.js  # config.js 추가
-          #git diff --staged --quiet || (git commit -m "Update news.json and config.js" && git push)
-          git commit -m "Update news.json and config.js"
+          git add news.json status.json  # config.js 제거, status.json 추가
+          git commit -m "Update news.json and status.json"
           git push
