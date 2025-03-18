@@ -27,5 +27,5 @@ jobs:
       - run: |
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
-          git add news.json
-          git diff --staged --quiet || (git commit -m "Update news.json" && git push)
+          git add news.json config.js  # config.js 추가
+          git diff --staged --quiet || (git commit -m "Update news.json and config.js" && git push)
