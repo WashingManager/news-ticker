@@ -1,4 +1,4 @@
-name: Update News 
+name: Update News
 on:
   schedule:
     - cron: '*/2 * * * *' # 매 2분마다 실행 (UTC)
