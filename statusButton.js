@@ -1,35 +1,32 @@
-// statusButton.js
-const STATUS_RANGE = '긴장혼잡도!A1:E4';
+const fetch = require('node-fetch');
+const fs = require('fs');
 
-async function updateStatusFromSheet() {
+async function updateStatus() {
+    const SHEET_ID = process.env.SHEET_ID;
+    const API_KEY = process.env.API_KEY;
+    const STATUS_RANGE = '긴장혼잡도!A1:E4';
+
     try {
         const response = await fetch(
-            `https://sheets.googleapis.com/v4/spreadsheets/${window.SHEET_ID}/values/${STATUS_RANGE}?key=${window.API_KEY}`
+            `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${STATUS_RANGE}?key=${API_KEY}`
         );
         if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
         const data = await response.json();
         if (!data.values) throw new Error('데이터가 비어 있습니다.');
 
         const rows = data.values;
-        const tensionRow = rows[1] || [];
-        const tensionLevels = document.querySelectorAll('.status-bars .status-bar:nth-child(1) .status-levels .status-level');
-        tensionLevels.forEach((level, index) => {
-            level.classList.remove('active');
-            if (tensionRow[index + 1] === '1') level.classList.add('active');
-        });
+        const tension = rows[1]?.slice(1).map(v => v === '1') || [false, false, false, false];
+        const congestion = rows[3]?.slice(1).map(v => v === '1') || [false, false, false];
 
-        const congestionRow = rows[3] || [];
-        const congestionLevels = document.querySelectorAll('.status-bars .status-bar:nth-child(2) .status-levels .status-level');
-        congestionLevels.forEach((level, index) => {
-            level.classList.remove('active');
-            if (congestionRow[index + 1] === '1') level.classList.add('active');
-        });
+        fs.writeFileSync(
+            'status.json',
+            JSON.stringify({ tension, congestion }, null, 2)
+        );
+        console.log('status.json 업데이트 성공');
     } catch (error) {
         console.error('상태 데이터 로드 실패:', error);
+        fs.writeFileSync('status.json', JSON.stringify({ tension: [], congestion: [] }, null, 2));
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    updateStatusFromSheet();
-    setInterval(updateStatusFromSheet, 60000);
-});
+updateStatus();
