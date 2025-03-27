@@ -1,9 +1,24 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 
+async function fetchWithRetry(url, retries = 3, delay = 2000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, { timeout: 10000 }); // 10초 타임아웃
+            console.log('응답 상태:', response.status);
+            if (!response.ok) throw new Error(`HTTP 오류: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error(`시도 ${i + 1}/${retries} 실패:`, error.message);
+            if (i < retries - 1) await new Promise(resolve => setTimeout(resolve, delay));
+            else throw error;
+        }
+    }
+}
+
 async function updateNews() {
-    const SHEET_ID = process.env.SHEET_ID;
-    const API_KEY = process.env.API_KEY;
+    const SHEET_ID = process.env.SHEET_ID || '***';
+    const API_KEY = process.env.API_KEY || '***';
     const NEWS_RANGE = '정세재난!C8:F';
 
     console.log('SHEET_ID:', SHEET_ID);
@@ -14,13 +29,10 @@ async function updateNews() {
     try {
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${NEWS_RANGE}?key=${API_KEY}`;
         console.log('요청 URL:', url);
-        const response = await fetch(url);
-        const text = await response.text();
-        console.log('응답 상태:', response.status);
-        console.log('응답 내용:', text);
-        if (!response.ok) throw new Error(`HTTP 오류: ${response.status}`);
 
-        const data = await JSON.parse(text);
+        const data = await fetchWithRetry(url);
+        console.log('응답 내용:', JSON.stringify(data));
+
         const today = new Date().toISOString().split('T')[0];
         const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
