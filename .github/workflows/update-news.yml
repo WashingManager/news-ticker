@@ -1,31 +1,33 @@
-name: Update News 
-on:
+name: Update News
+true:
   schedule:
-    #- cron: '*/30 * * * *' # 매 2분마다 실행 (UTC)
-     - cron: '0 13,23 * * *' # 오후 1시와 저녁 11시
-    # - cron: '0 0,6,12,18 * * *' # 기존: UTC 기준 0시, 6시, 12시, 18시
-  workflow_dispatch:
-
+  - cron: 0 13,23 * * *
+  workflow_dispatch: null
 permissions:
-  contents: write  # 리포지토리 쓰기 권한 부여
-
+  contents: write
 jobs:
   update:
-    runs-on: ubuntu-latest
     env:
-      SHEET_ID: ${{ secrets.SHEET_ID }}
       API_KEY: ${{ secrets.API_KEY }}
+      SHEET_ID: ${{ secrets.SHEET_ID }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      - run: npm install node-fetch@2
-      - run: |
-          echo "window.SHEET_ID='${{ secrets.SHEET_ID }}'; window.API_KEY='${{ secrets.API_KEY }}';" > config.js
-      - run: node update-news.js
-      - run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
-          git add news.json
-          git diff --staged --quiet || (git commit -m "Update news.json" && git push)
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - run: npm install node-fetch@2
+    - run: 'echo "window.SHEET_ID=''${{ secrets.SHEET_ID }}''; window.API_KEY=''${{
+        secrets.API_KEY }}'';" > config.js
+
+        '
+    - run: node update-news.js
+    - run: 'git config user.name "GitHub Action"
+
+        git config user.email "action@github.com"
+
+        git add news.json
+
+        git diff --staged --quiet || (git commit -m "Update news.json" && git push)
+
+        '
