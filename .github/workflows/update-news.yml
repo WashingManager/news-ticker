@@ -1,3 +1,10 @@
+name: Update News
+on:
+  schedule:
+    - cron: 0 0,12 * * *
+  workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   update:
     env:
@@ -5,29 +12,22 @@ jobs:
       SHEET_ID: ${{ secrets.SHEET_ID }}
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - run: npm install node-fetch@2
-    - run: 'echo "window.SHEET_ID=''${{ secrets.SHEET_ID }}''; window.API_KEY=''${{
-        secrets.API_KEY }}'';" > config.js
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: npm install node-fetch@2
+      - run: 'echo "window.SHEET_ID=''${{ secrets.SHEET_ID }}''; window.API_KEY=''${{
+          secrets.API_KEY }}'';" > config.js
 
-        '
-    - run: node update-news.js
-    - run: 'git config user.name "GitHub Action"
+          '
+      - run: node update-news.js
+      - run: 'git config user.name "GitHub Action"
 
-        git config user.email "action@github.com"
+          git config user.email "action@github.com"
 
-        git add news.json
+          git add news.json
 
-        git diff --staged --quiet || (git commit -m "Update news.json" && git push)
+          git diff --staged --quiet || (git commit -m "Update news.json" && git push)
 
-        '
-name: Update News
-'on':
-  schedule:
-  - cron: 0 0,12 * * *
-  workflow_dispatch: null
-permissions:
-  contents: write
+          '
