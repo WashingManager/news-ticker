@@ -8,6 +8,8 @@ URL = "https://embassywatch.gkuer.com/"
 
 # 데이터를 저장할 JSON 파일 이름
 JSON_FILE = "embassy_status.json"
+# [!! 신규 !!] 정상 국가 목록을 저장할 정적 파일
+NORMAL_LIST_FILE = "normal_countries.json" 
 
 def scrape_embassy_status():
     print(f"[{datetime.datetime.now()}] 스크래핑 시작: {URL}")
@@ -24,7 +26,7 @@ def scrape_embassy_status():
         country_items = soup.find_all("div", class_="country-item")
 
         withdrawal_list = []
-        normal_list = []
+        normal_list = [] # 정상 국가 목록을 여기에 수집
 
         if not country_items:
             print("오류: 'country-item' 요소를 찾을 수 없습니다.")
@@ -33,36 +35,28 @@ def scrape_embassy_status():
         for item in country_items:
             country = item.find("strong").get_text(strip=True).replace(":", "")
             
-            # [!! 로직 개선 !!]
-            # div의 전체 텍스트에서 국가명을 제외하여 상태 텍스트를 추출
             item_text = item.get_text(strip=True)
             status_full_text = item_text.replace(country + ":", "").strip()
 
             if status_full_text == "철수 소식 없음":
                 # 1. 평시 상태
-                normal_list.append(country)
+                normal_list.append(country) # [!! 수정 !!] 국가 이름 수집
             else:
-                # 2. 긴급 상황 (철수 소식 없음이 아님)
-                
-                # [!! 신규 로직 !!]
-                # 먼저, div 내부에서 <a> 태그 (확인된 링크)를 검색합니다.
+                # 2. 긴급 상황
                 link_tag = item.find("a")
-                link_url = URL  # 기본값 (Fallback)
+                link_url = URL
                 
                 if link_tag and link_tag.get('href'):
-                    # <a> 태그를 찾으면 해당 href를 사용
                     link_url = link_tag.get('href')
 
-                # [!! 신규 로직 !!]
-                # title에 "확인된 링크:" 텍스트가 포함되지 않도록 분리
                 status_description = status_full_text.split("확인된 링크:")[0].strip()
                 if not status_description:
-                    status_description = status_full_text # 혹시 모를 예외 처리
+                    status_description = status_full_text
 
                 withdrawal_list.append({
                     "title": f"🚨 [긴급] {country} 대사관: {status_description}",
                     "status": "withdrawal",
-                    "link": link_url # 찾은 링크 또는 기본 URL
+                    "link": link_url
                 })
 
         output_data = []
@@ -73,12 +67,23 @@ def scrape_embassy_status():
         else:
             # 모두 정상이면 요약 메시지 하나만 출력
             print(f"모든 대사관 정상: {len(normal_list)}개국")
+            
+            # [!! 수정 !!] 간결한 title로 변경
             output_data = [{
-                "title": f"주한 대사관 현황: {len(normal_list)}개국 모두 정상 (철수 소식 없음)",
+                "title": f"주한 대사관 현황: {len(normal_list)}개국 (철수 소식 없음)", 
                 "status": "normal",
-                "link": URL # 평시 상태일 때도 link 필드는 유지
+                "link": URL
             }]
+            
+            # [!! 신규 !!] "정상" 국가 목록을 별도 파일로 저장 (데이터 중복 방지)
+            try:
+                with open(NORMAL_LIST_FILE, "w", encoding="utf-8") as f_countries:
+                    json.dump(normal_list, f_countries, ensure_ascii=False, indent=2)
+                print(f"{NORMAL_LIST_FILE} 파일에 {len(normal_list)}개국 목록 저장 완료.")
+            except Exception as e:
+                print(f"오류: {NORMAL_LIST_FILE} 파일 저장 실패. {e}")
 
+        # embassy_status.json 파일 저장
         with open(JSON_FILE, "w", encoding="utf-8") as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
             
