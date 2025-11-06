@@ -19,6 +19,12 @@ def scrape_embassy_status():
         }
         response = requests.get(URL, headers=headers, timeout=10)
         response.raise_for_status()  # 오류가 발생하면 예외 발생
+        
+        # [!! 중요 수정 !!]
+        # 원본 페이지가 UTF-8임에도 불구하고 requests 라이브러리가 인코딩을 잘못 추측할 수 있습니다.
+        # (GitHub Actions 환경 등에서 자주 발생)
+        # response.text를 읽기 전에 강제로 UTF-8로 설정하여 한글 깨짐을 방지합니다.
+        response.encoding = 'utf-8'
 
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -35,29 +41,34 @@ def scrape_embassy_status():
         for item in country_items:
             country = item.find("strong").get_text(strip=True).replace(":", "")
             # <strong> 태그 다음의 텍스트 노드가 상태 정보임
-            status = item.strong.next_sibling.strip()
+            status_text = item.strong.next_sibling.strip()
 
-            if status != "철수 소식 없음":
-                # 평시 상태가 아닐 경우
+            # [!! 로직 수정됨 !!]
+            # 인코딩이 수정되었으므로, 이제 "철수 소식 없음"이 정확히 비교됩니다.
+            if status_text != "철수 소식 없음":
+                # 평시 상태가 아닐 경우 (예: "철수 시작", "여행 금지")
                 withdrawal_list.append({
-                    "title": f"🚨 [긴급] {country} 대사관: {status}",
-                    "status": "withdrawal",
+                    "title": f"🚨 [긴급] {country} 대사관: {status_text}",
+                    "status": "withdrawal", # JSON에 'withdrawal' 상태 명시
                     "link": URL
                 })
             else:
+                # 평시 상태일 경우
                 normal_list.append(country)
 
         output_data = []
         if withdrawal_list:
-            # 철수/이상 국가가 하나라도 있으면
+            # [!! 간결성 !!]
+            # 철수/이상 국가가 하나라도 있으면, '긴급' 목록만 보여줍니다.
             print(f"!!! 긴급 상황 감지: {len(withdrawal_list)}개국")
             output_data = withdrawal_list
         else:
-            # 모든 국가가 정상이면
+            # [!! 간결성 !!]
+            # 모든 국가가 정상이면, '정상' 요약 메시지 '하나'만 보여줍니다.
             print(f"모든 대사관 정상: {len(normal_list)}개국")
             output_data = [{
                 "title": f"주한 대사관 현황: {len(normal_list)}개국 모두 정상 (철수 소식 없음)",
-                "status": "normal",
+                "status": "normal", # JSON에 'normal' 상태 명시
                 "link": URL
             }]
 
