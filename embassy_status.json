@@ -1,7 +1,10 @@
-[
-  {
-    "title": "주한 대사관 현황: 79개국 (철수 소식 없음)",
-    "status": "normal",
-    "link": "https://embassywatch.gkuer.com/"
-  }
-]
+{
+  "lastUpdate": "",
+  "items": [
+    {
+      "title": "주한 대사관 현황: 79개국 (철수 소식 없음)",
+      "status": "normal",
+      "link": "https://embassywatch.gkuer.com/"
+    }
+  ]
+}
