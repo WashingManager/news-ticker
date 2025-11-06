@@ -72,8 +72,6 @@ def scrape_embassy_status():
 
         soup = BeautifulSoup(response.text, "html.parser")
         
-        # [!! 삭제 !!] 시간 스크래핑 로직은 위에서 계산했으므로 필요 없음.
-
         # --- 국가 목록 처리 ---
         country_items = soup.find_all("div", class_="country-item")
         
@@ -119,8 +117,10 @@ def scrape_embassy_status():
     elif normal_list:
         # 긴급 상황이 없고, 정상 목록이 있으면
         print(f"모든 대사관 정상: {len(normal_list)}개국")
+        
+        # [!! 수정 !!] title 형식을 요청하신 대로 변경
         output_data_list = [{
-            "title": f"주한 대사관 현황: {len(normal_list)}개국 (철수 소식 없음)", 
+            "title": f"{len(normal_list)}개국 주한 대사관 철수 소식 없음", 
             "status": "normal",
             "link": URL
         }]
@@ -141,13 +141,13 @@ def scrape_embassy_status():
             "link": URL
         }]
 
-    # [!! 신규 !!] 최종 JSON 객체 생성 (시간 + 아이템 목록)
+    # 최종 JSON 객체 생성 (시간 + 아이템 목록)
     final_json_output = {
         "lastUpdate": last_update_time,
         "items": output_data_list
     }
 
-    # [!! 수정 !!] 최종 객체를 embassy_status.json 파일에 저장
+    # 최종 객체를 embassy_status.json 파일에 저장
     with open(JSON_FILE, "w", encoding="utf-8") as f:
         json.dump(final_json_output, f, ensure_ascii=False, indent=2)
         
